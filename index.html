@@ -1,12 +1,7 @@
-  <button id="show-all-questions" style="margin-top:20px;">Show All Questions</button>
-  <button id="generate-random-question" style="margin-top:20px;">Generate Random Question</button>
-  <div id="all-questions-list" style="display:none;max-width:600px;margin:20px auto;text-align:left;background:#f9f9f9;padding:15px;border-radius:8px;"></div>
-  <button id="show-answers-log" style="margin-top:20px;">Show Team Answers Log</button>
-  <div id="answers-log-list" style="display:none;max-width:600px;margin:20px auto;text-align:left;background:#f1f8e9;padding:15px;border-radius:8px;"></div>
 <!DOCTYPE html>
 <html lang="en">
-<head><link rel="stylesheet" href="style.css" />
-<meta charset="UTF-8" />
+<head>
+  <meta charset="UTF-8" />
   <title>IT Wheel of Fortune</title>
   <style>
     body {
@@ -17,10 +12,106 @@
       margin: 0;
       padding: 20px;
     }
-    h1 {
+    h1 { color: #1565c0; }
+
+    /* ── INSTRUCTIONS SCREEN ── */
+    #instructions-screen {
+      max-width: 680px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 40px 36px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+      text-align: left;
+    }
+    #instructions-screen h1 {
+      text-align: center;
+      font-size: 2em;
+      margin-bottom: 6px;
+    }
+    #instructions-screen .subtitle {
+      text-align: center;
+      color: #555;
+      font-size: 1.05em;
+      margin-bottom: 28px;
+    }
+    .instruction-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+      background: #f0f8ff;
+      border-radius: 10px;
+      padding: 14px 18px;
+    }
+    .instruction-card .icon {
+      font-size: 2em;
+      flex-shrink: 0;
+    }
+    .instruction-card h3 {
+      margin: 0 0 4px;
+      color: #1565c0;
+      font-size: 1em;
+    }
+    .instruction-card p {
+      margin: 0;
+      color: #444;
+      font-size: 0.95em;
+      line-height: 1.5;
+    }
+    .vibe-box {
+      background: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 24px 0;
+      font-size: 1em;
+      color: #2e7d32;
+      line-height: 1.6;
+    }
+    #name-entry {
+      text-align: center;
+      margin-top: 28px;
+    }
+    #name-entry label {
+      display: block;
+      font-weight: bold;
+      font-size: 1.05em;
+      margin-bottom: 10px;
       color: #1565c0;
     }
-    /* Removed conflicting wheel and slice CSS. Use style.css only. */
+    #name-entry input {
+      padding: 12px 16px;
+      font-size: 16px;
+      width: 70%;
+      max-width: 340px;
+      border: 2px solid #90caf9;
+      border-radius: 8px;
+      outline: none;
+    }
+    #name-entry input:focus { border-color: #1565c0; }
+    #start-game-btn {
+      display: block;
+      margin: 18px auto 0;
+      padding: 14px 40px;
+      font-size: 18px;
+      background: #1565c0;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #start-game-btn:hover { background: #0d47a1; }
+    #name-error {
+      color: #e53935;
+      font-size: 0.9em;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+
+    /* ── GAME SCREEN ── */
+    #game-screen { display: none; }
     #spin-btn {
       margin-top: 20px;
       padding: 12px 24px;
@@ -31,10 +122,7 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    #spin-btn:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
+    #spin-btn:disabled { background: #ccc; cursor: not-allowed; }
     #category-display {
       font-size: 26px;
       margin: 20px 0;
@@ -85,35 +173,457 @@
       cursor: pointer;
       display: none;
     }
+
+    /* ── WHEEL ── */
+    #wheel-pointer {
+      position: absolute;
+      left: 50%;
+      top: -30px;
+      width: 0;
+      height: 0;
+      border-left: 24px solid transparent;
+      border-right: 24px solid transparent;
+      border-bottom: 40px solid #e91e63;
+      z-index: 10;
+      transform: translateX(-50%);
+      filter: drop-shadow(0 2px 6px #0008);
+      transition: border-bottom-color 0.3s;
+    }
+    #wheel-pointer.idle { animation: pointerWobble 2s infinite; }
+    @keyframes pointerWobble {
+      0%, 100% { transform: translateX(-50%) rotate(0deg); }
+      25%       { transform: translateX(-50%) rotate(-2deg); }
+      75%       { transform: translateX(-50%) rotate(2deg); }
+    }
+    #wheel-container {
+      margin: 40px auto;
+      position: relative;
+      width: 600px;
+      height: 600px;
+      background: none;
+    }
+    #wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      transition: transform 1.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+      transform: rotate(0deg);
+      background: #eee;
+      box-shadow: 0 8px 40px #0006, 0 0 0 8px #fff8;
+      border: 8px solid #fff;
+    }
+    #wheel.pulsing { animation: wheelPulse 6s ease-in-out infinite; }
+    @keyframes wheelPulse {
+      0%, 100% { box-shadow: 0 8px 40px #0006, 0 0 0 8px #fff8; }
+      50%       { box-shadow: 0 12px 60px #0008, 0 0 0 10px #fff9; }
+    }
+    .slice-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 70px;
+      color: #fff;
+      font-weight: bold;
+      text-shadow: 2px 2px 6px #000, 0 0 2px #000;
+      font-size: 13px;
+      line-height: 1.1;
+      text-align: center;
+      pointer-events: none;
+      transform-origin: center left;
+      background: rgba(0,0,0,0.18);
+      border-radius: 8px;
+      padding: 2px 4px;
+      box-shadow: 0 2px 8px #0004;
+      letter-spacing: 0.2px;
+    }
+
+    /* ── LOG / QUESTION PANELS ── */
+    #all-questions-list, #answers-log-list {
+      max-width: 600px;
+      margin: 20px auto;
+      text-align: left;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    #all-questions-list { background: #f9f9f9; display: none; }
+    #answers-log-list   { background: #f1f8e9; display: none; }
   </style>
 </head>
 <body>
 
-  <h1>IT Wheel of Fortune</h1>
+  <!-- ══════════════ INSTRUCTIONS SCREEN ══════════════ -->
+  <div id="instructions-screen">
+    <h1>🎡 IT Wheel of Fortune</h1>
+    <p class="subtitle">A fun knowledge check for the whole IT team!</p>
 
+    <div class="instruction-card">
+      <div class="icon">📝</div>
+      <div>
+        <h3>Enter Your Name</h3>
+        <p>Start by entering your name below so we can track everyone's responses. No accounts needed — just type and go!</p>
+      </div>
+    </div>
 
-  <div id="wheel-container" style="position:relative;">
-    <div id="wheel-pointer"></div>
-    <div id="wheel"></div>
+    <div class="instruction-card">
+      <div class="icon">🎡</div>
+      <div>
+        <h3>Spin the Wheel</h3>
+        <p>Hit <strong>Spin the Wheel</strong> and let it land on a random category. There are 7 IT categories to explore!</p>
+      </div>
+    </div>
+
+    <div class="instruction-card">
+      <div class="icon">💬</div>
+      <div>
+        <h3>Answer in Your Own Words</h3>
+        <p>A question from that category will appear. Type whatever comes to mind — there's no trick here, just put what you already know. Your answer is saved automatically.</p>
+      </div>
+    </div>
+
+    <div class="instruction-card">
+      <div class="icon">🗂️</div>
+      <div>
+        <h3>7 Categories</h3>
+        <p>The wheel covers: <strong>Incident Management & Ticketing · Password & Access · Hardware & Equipment · Network & Connectivity · Software & Applications · User Training & Documentation · Knowledge & Escalation</strong></p>
+      </div>
+    </div>
+
+    <div class="vibe-box">
+      😊 <strong>No pressure at all!</strong> This game is not timed and there are no wrong answers — it's just a fun way to see what we already know as a team. Play it when you have a few minutes to spare or want a little distraction. Enjoy! 🎉
+    </div>
+
+    <div id="name-entry">
+      <label for="start-name-input">What's your name?</label>
+      <input type="text" id="start-name-input" placeholder="e.g. Alex, Maria, J. Smith..." />
+      <div id="name-error"></div>
+      <button id="start-game-btn">Let's Play! 🎡</button>
+    </div>
   </div>
 
+  <!-- ══════════════ GAME SCREEN ══════════════ -->
+  <div id="game-screen">
+    <h1>IT Wheel of Fortune</h1>
 
-<button id="spin-btn">Spin the Wheel</button>
+    <div id="wheel-container" style="position:relative;">
+      <div id="wheel-pointer"></div>
+      <div id="wheel"></div>
+    </div>
 
-  <div id="category-display">Spin to begin!</div>
+    <button id="spin-btn">Spin the Wheel</button>
+    <div id="category-display">Spin to begin!</div>
+    <div id="question">Your question will appear here.</div>
 
-  <div id="question">Your question will appear here.</div>
+    <input type="text" id="answer-input" placeholder="Type your answer..." />
+    <button id="submit-btn">Submit</button>
+    <button id="next-btn" style="display:none; margin-left:10px;">Next Question</button>
+    <div id="feedback"></div>
+    <button id="report-btn">Report Issue</button>
 
-  <input type="text" id="player-name" placeholder="Enter your name..." style="margin-bottom:10px;display:block;width:70%;max-width:400px;" />
-  <input type="text" id="answer-input" placeholder="Type your answer..." />
-  <button id="submit-btn">Submit</button>
-  <button id="next-btn" style="display:none; margin-left:10px;">Next Question</button>
+    <br/>
+    <button id="show-all-questions" style="margin-top:20px;">Show All Questions</button>
+    <button id="generate-random-question" style="margin-top:20px;">Generate Random Question</button>
+    <div id="all-questions-list"></div>
+    <button id="show-answers-log" style="margin-top:20px;">Show Team Answers Log</button>
+    <div id="answers-log-list"></div>
+  </div>
 
-  <div id="feedback"></div>
+  <script>
+  // ── DATA ──────────────────────────────────────────────────────────────────
+  const categories = [
+    { cat: "Incident Management & Ticketing", emoji: "📊" },
+    { cat: "Password & Access",               emoji: "🔐" },
+    { cat: "Hardware & Equipment",            emoji: "🖥️" },
+    { cat: "Network & Connectivity",          emoji: "🌐" },
+    { cat: "Software & Applications",         emoji: "💾" },
+    { cat: "User Training & Documentation",   emoji: "📚" },
+    { cat: "Knowledge & Escalation",          emoji: "🧠" }
+  ];
 
-  <button id="report-btn">Report Issue</button>
+  const questions = [
+    { q: "How do you assign a ticket in ServiceNow?",           cat: "Incident Management & Ticketing", v: 100 },
+    { q: "What's the process for escalating a P1 incident?",    cat: "Incident Management & Ticketing", v: 100 },
+    { q: "How do you reset a user's password in AD?",           cat: "Password & Access",               v: 100 },
+    { q: "What do you do if a user is locked out?",             cat: "Password & Access",               v: 100 },
+    { q: "How do you deploy a new laptop?",                     cat: "Hardware & Equipment",            v: 100 },
+    { q: "What cables are needed for a desktop setup?",         cat: "Hardware & Equipment",            v: 100 },
+    { q: "How do you troubleshoot no internet?",                cat: "Network & Connectivity",          v: 100 },
+    { q: "What does a flashing router light mean?",             cat: "Network & Connectivity",          v: 100 },
+    { q: "How do you install Office 365?",                      cat: "Software & Applications",         v: 100 },
+    { q: "What to do if Outlook won't open?",                   cat: "Software & Applications",         v: 100 },
+    { q: "How do you run a training session?",                  cat: "User Training & Documentation",   v: 100 },
+    { q: "Where are the SOPs stored?",                          cat: "User Training & Documentation",   v: 100 },
+    { q: "When should you escalate to L2?",                     cat: "Knowledge & Escalation",          v: 100 },
+    { q: "What info must you include before escalating?",       cat: "Knowledge & Escalation",          v: 100 },
+    { q: "How do you check if a ticket is resolved?",           cat: "Incident Management & Ticketing", v: 100 },
+    { q: "What's the SLA for a P2 incident?",                   cat: "Incident Management & Ticketing", v: 100 },
+    { q: "How do you verify a user's identity?",                cat: "Password & Access",               v: 100 }
+  ];
 
-  <!-- Ensure the script is loaded at the end of the body -->
-  <script src="Script.js"></script>
+  const extraQuestionGroups = {
+    'Incident Management & Ticketing': [
+      "What are the exact steps from ticket arrival to closure?",
+      "How do you determine ticket priority and severity levels?",
+      "What triggers an escalation to tier 2/3 support?",
+      "How do you handle tickets where the issue doesn't match what you find?",
+      "What information do you always gather first before troubleshooting?",
+      "How do you decide whether to resolve quickly vs. create proper documentation?",
+      "What's your process for tickets involving multiple teams or departments?",
+      "How do you communicate with users during long-running incidents?",
+      "What do you do when you receive a duplicate ticket for an ongoing issue?",
+      "How do you handle after-hours or weekend tickets?",
+      "What is your process for tickets requiring follow-up after the initial fix?",
+      "How do you manage tickets waiting on user response or external vendor input?",
+      "What do you do when you encounter a difficult or unresponsive user?"
+    ],
+    'Password & Access': [
+      "What is your step-by-step process for onboarding new users?",
+      "What's your actual process for password resets?",
+      "How do you verify user identity before resetting passwords?",
+      "What do you do when someone requests access to unfamiliar systems?",
+      "How do you handle access requests for terminated employees?",
+      "What's the process when someone is locked out of multiple systems?",
+      "How do you handle VPN access issues?",
+      "What do you check when MFA/2FA isn't working?",
+      "How do you handle emergency access requests outside business hours?",
+      "What is your process for granting temporary access for contractors?"
+    ],
+    'Hardware & Equipment': [
+      "What's your complete process for setting up a new employee's workstation?",
+      "What's your step-by-step troubleshooting for 'computer won't turn on'?",
+      "What security checks do you perform when setting up a new device?",
+      "How do you troubleshoot 'computer is slow' complaints?",
+      "What's your procedure for laptop or equipment replacement?",
+      "How do you handle equipment requests for remote employees?",
+      "What do you do when retrieving equipment from departing employees?",
+      "What steps do you take when a device is infected with malware?"
+    ],
+    'Software & Applications': [
+      "What's your step-by-step process for installing new software requests?",
+      "How do you handle software license issues or activation problems?",
+      "What's your troubleshooting sequence for application crashes?",
+      "How do you handle requests for software not on the approved list?",
+      "What do you do when software updates break existing functionality?",
+      "How do you handle browser-specific issues with web applications?",
+      "What's your process for removing software from departing employees' machines?"
+    ],
+    'Network & Connectivity': [
+      "What's your diagnostic process for 'internet not working' tickets?",
+      "How do you troubleshoot WiFi connectivity issues step-by-step?",
+      "What do you check when users can't access shared drives?",
+      "How do you handle VPN connectivity problems?",
+      "What's your process when email isn't working for a user?",
+      "How do you determine if an issue is network-related vs. device-related?"
+    ],
+    'User Training & Documentation': [
+      "How do you explain technical issues to non-technical users?",
+      "What information do you always document in ticket notes?",
+      "How do you handle situations where users are upset or frustrated?",
+      "What's your process for following up on unresolved tickets?",
+      "How do you communicate known issues or outages to users?",
+      "When do you stop troubleshooting and escalate?",
+      "What workarounds do you use regularly that aren't documented?"
+    ],
+    'Knowledge & Escalation': [
+      "What resources do you check first when you don't know the answer?",
+      "What common issues do you wish had better documentation?",
+      "How do you handle issues you've never seen before?",
+      "What's your process for knowledge transfer when a team member leaves?",
+      "How do you stay updated on new IT policies or system changes?"
+    ]
+  };
 
+  Object.entries(extraQuestionGroups).forEach(([catName, arr]) => {
+    arr.forEach(qText => questions.push({ q: qText, cat: catName, v: 100 }));
+  });
+
+  // fill to 70 questions if needed
+  while (questions.length < 70) {
+    const randomCat = categories[Math.floor(Math.random() * categories.length)];
+    questions.push({ q: `What is a best practice in ${randomCat.cat}?`, cat: randomCat.cat, v: 100 });
+  }
+
+  // ── LOCAL ANSWER LOG ─────────────────────────────────────────────────────
+  let answersLog = [];
+  function logAnswer(entry) {
+    answersLog.push(entry);
+  }
+
+  // ── INSTRUCTIONS → GAME HANDOFF ──────────────────────────────────────────
+  const instructionsScreen = document.getElementById('instructions-screen');
+  const gameScreen          = document.getElementById('game-screen');
+  const startNameInput      = document.getElementById('start-name-input');
+  const nameError           = document.getElementById('name-error');
+  const startGameBtn        = document.getElementById('start-game-btn');
+
+  startGameBtn.addEventListener('click', () => {
+    const name = startNameInput.value.trim();
+    if (!name) {
+      nameError.textContent = 'Please enter your name to start!';
+      startNameInput.focus();
+      return;
+    }
+    nameError.textContent = '';
+    instructionsScreen.style.display = 'none';
+    gameScreen.style.display = 'block';
+    // pre-fill the player name for the game (no separate field needed)
+    currentPlayerName = name;
+    initWheel();
+  });
+
+  // also allow Enter key
+  startNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') startGameBtn.click(); });
+
+  // ── WHEEL SETUP ───────────────────────────────────────────────────────────
+  let currentPlayerName = '';
+  let canSpin = true;
+  let currentQuestion = null;
+  let lastSliceIndex = 0;
+
+  function initWheel() {
+    const wheel        = document.getElementById('wheel');
+    const wheelPointer = document.getElementById('wheel-pointer');
+    const spinBtn      = document.getElementById('spin-btn');
+    const categoryDisplay = document.getElementById('category-display');
+    const questionDisplay = document.getElementById('question');
+    const answerInput  = document.getElementById('answer-input');
+    const submitBtn    = document.getElementById('submit-btn');
+    const feedbackEl   = document.getElementById('feedback');
+    const nextBtn      = document.getElementById('next-btn');
+
+    wheel.classList.add('pulsing');
+    wheelPointer.classList.add('idle');
+
+    // Build conic-gradient
+    const sliceAngle = 360 / categories.length;
+    let gradient = '';
+    categories.forEach((c, i) => {
+      const start = (i * sliceAngle).toFixed(2);
+      const end   = ((i + 1) * sliceAngle).toFixed(2);
+      gradient += `hsl(${i * sliceAngle}, 70%, 50%) ${start}deg ${end}deg`;
+      if (i < categories.length - 1) gradient += ', ';
+    });
+    wheel.style.background = `conic-gradient(${gradient})`;
+
+    // Labels
+    const wheelRadius = 300, labelRadius = 145;
+    categories.forEach((c, i) => {
+      const label = document.createElement('div');
+      label.className = 'slice-label';
+      const angle = ((i + 0.5) * sliceAngle - 90) * Math.PI / 180;
+      label.style.left      = `${Math.cos(angle) * labelRadius + wheelRadius}px`;
+      label.style.top       = `${Math.sin(angle) * labelRadius + wheelRadius}px`;
+      label.style.transform = 'translate(-50%,-50%)';
+      label.style.border    = `2px solid hsl(${i * sliceAngle}, 70%, 60%)`;
+      label.innerHTML = `<span style='font-size:1.2em;'>${c.emoji}</span><br><span style='font-size:11px;'>${c.cat}</span>`;
+      wheel.appendChild(label);
+    });
+
+    // Submit
+    submitBtn.addEventListener('click', () => {
+      const userAnswer = answerInput.value.trim();
+      if (!userAnswer) {
+        feedbackEl.textContent = 'Please type an answer first!';
+        feedbackEl.style.color = 'orange';
+        return;
+      }
+      feedbackEl.textContent = '✅ Answer saved! Hit Next Question to keep going.';
+      feedbackEl.style.color = '#1565c0';
+      submitBtn.disabled = true;
+      nextBtn.style.display = 'inline-block';
+
+      logAnswer({
+        player:   currentPlayerName,
+        answer:   userAnswer,
+        question: currentQuestion ? currentQuestion.q : '',
+        category: currentQuestion ? currentQuestion.cat : '',
+        time:     new Date().toLocaleString()
+      });
+    });
+
+    // Next Question
+    nextBtn.addEventListener('click', () => {
+      nextBtn.style.display = 'none';
+      spinBtn.disabled = false;
+      feedbackEl.textContent = '';
+      answerInput.value = '';
+      submitBtn.disabled = false;
+      canSpin = true;
+      spinBtn.click();
+    });
+
+    // Spin
+    spinBtn.addEventListener('click', () => {
+      if (!canSpin) return;
+      canSpin = false;
+      spinBtn.disabled = true;
+      feedbackEl.textContent = '';
+      answerInput.value = '';
+      submitBtn.disabled = false;
+
+      wheel.classList.remove('pulsing');
+      wheelPointer.classList.remove('idle');
+
+      const randomDegree = 7200 + Math.floor(Math.random() * 360);
+      wheel.style.transition = 'transform 1.8s cubic-bezier(0.25, 0.1, 0.25, 1)';
+      wheel.style.transform  = `rotate(${randomDegree}deg)`;
+      wheelPointer.style.borderBottomColor = '#ffeb3b';
+
+      const actualDegrees = randomDegree % 360;
+      lastSliceIndex = Math.floor((360 - actualDegrees) / sliceAngle) % categories.length;
+    });
+
+    // After spin ends
+    wheel.addEventListener('transitionend', () => {
+      canSpin = true;
+      spinBtn.disabled = false;
+      wheelPointer.style.borderBottomColor = '#4caf50';
+      setTimeout(() => { wheelPointer.style.borderBottomColor = '#e91e63'; }, 1000);
+      wheel.classList.add('pulsing');
+      wheelPointer.classList.add('idle');
+
+      const selectedCategory = categories[lastSliceIndex].cat;
+      const categoryQuestions = questions.filter(q => q.cat === selectedCategory);
+      currentQuestion = categoryQuestions[Math.floor(Math.random() * categoryQuestions.length)];
+      categoryDisplay.textContent = `${categories[lastSliceIndex].emoji} ${selectedCategory}`;
+      questionDisplay.textContent = currentQuestion.q;
+    });
+
+    // Show all questions
+    document.getElementById('show-all-questions').addEventListener('click', () => {
+      const list = document.getElementById('all-questions-list');
+      if (list.style.display === 'none' || list.style.display === '') {
+        list.style.display = 'block';
+        list.innerHTML = questions.map((q, i) =>
+          `<p><strong>${i + 1}. [${q.cat}]</strong> ${q.q}</p>`).join('');
+      } else { list.style.display = 'none'; }
+    });
+
+    // Random question
+    document.getElementById('generate-random-question').addEventListener('click', () => {
+      const q = questions[Math.floor(Math.random() * questions.length)];
+      questionDisplay.textContent = q.q;
+      categoryDisplay.textContent = q.cat;
+      currentQuestion = q;
+    });
+
+    // Show answers log
+    document.getElementById('show-answers-log').addEventListener('click', () => {
+      const list = document.getElementById('answers-log-list');
+      if (list.style.display === 'none' || list.style.display === '') {
+        list.style.display = 'block';
+        if (answersLog.length === 0) {
+          list.innerHTML = '<p>No answers logged yet.</p>';
+        } else {
+          list.innerHTML = answersLog.map(a =>
+            `<p><strong>${a.player}</strong> [${a.category}]<br>Q: ${a.question}<br>A: ${a.answer}<br><small>${a.time}</small></p><hr>`
+          ).join('');
+        }
+      } else { list.style.display = 'none'; }
+    });
+  }
+  </script>
+</body>
+</html>
  
