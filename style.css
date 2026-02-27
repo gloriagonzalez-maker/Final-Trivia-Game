@@ -1,0 +1,90 @@
+/* Wheel pointer/arrow */
+#wheel-pointer {
+  position: absolute;
+  left: 50%;
+  top: -30px;
+  width: 0;
+  height: 0;
+  border-left: 24px solid transparent;
+  border-right: 24px solid transparent;
+  border-bottom: 40px solid #e91e63;
+  z-index: 10;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 2px 6px #0008);
+  transition: border-bottom-color 0.3s;
+}
+
+/* apply wobble only when pointer is idle */
+#wheel-pointer.idle {
+  animation: pointerWobble 2s infinite;
+}
+
+@keyframes pointerWobble {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  25% { transform: translateX(-50%) rotate(-2deg); }
+  75% { transform: translateX(-50%) rotate(2deg); }
+}
+
+/* --- WHEEL STYLES --- */
+/* Bigger, more beautiful wheel */
+#wheel-container {
+  margin: 40px auto;
+  position: relative;
+  width: 600px;
+  height: 600px;
+  background: none;
+}
+#wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  /* faster, more dynamic spin with a smooth ease-out curve */
+  transition: transform 1.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transform: rotate(0deg);
+  background: #eee;
+  box-shadow: 0 8px 40px #0006, 0 0 0 8px #fff8;
+  border: 8px solid #fff;
+}
+
+/* pulsing glow when wheel is not spinning */
+#wheel.pulsing {
+  animation: wheelPulse 6s ease-in-out infinite;
+}
+
+/* pulse effect to keep wheel visually interesting when static */
+@keyframes wheelPulse {
+  0%, 100% { box-shadow: 0 8px 40px #0006, 0 0 0 8px #fff8; }
+  50% { box-shadow: 0 12px 60px #0008, 0 0 0 10px #fff9; }
+}
+.slice {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  left: 50%;
+  top: 50%;
+  transform-origin: 0% 0%;
+  border-radius: 0 1000px 0 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.slice-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70px;
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 2px 2px 6px #000, 0 0 2px #000;
+  font-size: 13px;
+  line-height: 1.1;
+  text-align: center;
+  pointer-events: none;
+  transform-origin: center left;
+  background: rgba(0,0,0,0.18);
+  border-radius: 8px;
+  padding: 2px 4px;
+  box-shadow: 0 2px 8px #0004;
+  letter-spacing: 0.2px;
+}

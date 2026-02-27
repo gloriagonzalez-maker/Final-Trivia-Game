@@ -1,0 +1,6 @@
+runtime: nodejs18
+
+env_variables:
+  # set your spreadsheet id and path to credentials on App Engine
+  SHEET_ID: 'YOUR_SPREADSHEET_ID'
+  GOOGLE_APPLICATION_CREDENTIALS: 'credentials.json'
