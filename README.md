@@ -1,50 +1,58 @@
-# Final Trivia Game
+🎡 IT Wheel of Fortune — Team Trivia Game
+A fun, no-pressure IT trivia game built for team knowledge checks. Players spin a wheel to land on a category, then answer an open-ended IT question in their own words. No timers, no wrong answers — just a great way to see what the team already knows!
 
-This is an "IT Wheel of Fortune" style trivia game built with plain HTML/CSS/JavaScript and a small Node.js backend for logging answers to Google Sheets. The project is configured to work locally and to be deployed to Google App Engine.
+🚀 How to Play
+	1. Open the game link in any browser
+	2. Enter your name on the welcome screen
+	3. Click Let's Play!
+	4. Hit Spin the Wheel to land on a random IT category
+	5. Read the question and type your answer
+	6. Click Submit — your answer is saved automatically
+	7. Hit Next Question to spin again!
 
-## Features added
+🗂️ Categories
+Emoji	Category
+📊	Incident Management & Ticketing
+🔐	Password & Access
+🖥️	Hardware & Equipment
+🌐	Network & Connectivity
+💾	Software & Applications
+📚	User Training & Documentation
+🧠	Knowledge & Escalation
 
-- Faster spin animation (1.8s) with cubic-bezier easing for a smooth feel
-- Increased rotation count (20+ full revolutions) for excitement
-- Pulsing glow animation on wheel when idle
-- Pointer wobble animation when idle; stops while spinning
-- JS/ CSS transition curves are synchronized
-- Static assets are served by Express for easier deployment
+✨ Features
+	• 🎡 Animated spinning wheel with 7 IT categories
+	• 📝 Welcome screen with full instructions before the game starts
+	• 💬 Open-ended questions — players write answers in their own words
+	• 📋 Show All Questions — browse every question in the game
+	• 🎲 Generate Random Question — skip the wheel and get a random question
+	• 📊 Show Team Answers Log — view all submitted answers in one place
+	• ⏱️ No timer — completely self-paced and stress-free
 
-## Local setup
+📊 Viewing Team Responses
+All answers are logged locally during the session. To view them:
+	1. Scroll to the bottom of the game page
+	2. Click Show Team Answers Log
+	3. All player names, questions, answers, categories and timestamps will appear
+	4. Screenshot or copy/paste into a spreadsheet for your records
+	Note: Answers are stored in the browser session only. They will reset if the page is refreshed, so make sure to save the log before closing!
 
-1. Copy `.env.example` to `.env` and fill in `SHEET_ID` and point `GOOGLE_APPLICATION_CREDENTIALS` to your credentials file.
-2. Place your `credentials.json` from Google Cloud in the project root (do not commit that file).
-3. Install dependencies:
-   ```sh
-   npm install
-   ```
-4. Start the server:
-   ```sh
-   npm run dev   # requires nodemon
-   # or npm start
-   ```
-5. Open `http://localhost:3001` in your browser.
+🛠️ Tech Stack
+	• Pure HTML, CSS, and JavaScript — no frameworks, no dependencies
+	• Single file (index.html) — easy to deploy anywhere
+	• Hosted via GitHub Pages (free)
 
-## Deploying to App Engine
+📁 Project Structure
+/
+└── index.html      # The entire game — all code in one file
+└── README.md       # You're reading it!
 
-1. Ensure you have the [Google Cloud SDK](https://cloud.google.com/sdk) installed and initialized.
-2. Authenticate and select your project:
-   ```sh
-   gcloud auth login
-   gcloud config set project YOUR_PROJECT_ID
-   ```
-3. Update `app.yaml` with your real `SHEET_ID` (or use Secrets Manager).
-4. Copy the service account JSON (for Sheets access) to the project and update `GOOGLE_APPLICATION_CREDENTIALS` accordingly.
-5. Deploy:
-   ```sh
-   gcloud app deploy
-   ```
 
-App Engine will install dependencies based on `package.json` and start the server using the `start` script.
+🌐 Deployment
+This game is hosted on GitHub Pages. Any changes pushed to the main branch will automatically go live within a few minutes.
 
-## Notes
+👩‍💻 Created By
+Built for internal IT team use. For questions or issues, contact the repo owner.
 
-- Static files (`index.html`, `style.css`, `Script.js`, etc.) live in the project root and are automatically served.
-- All game logic runs in the browser; the backend only appends answers to a sheet.
-- Make sure your Google Sheet is shared with the service account email from the credentials.
+<img width="504" height="2575" alt="image" src="https://github.com/user-attachments/assets/0f76910a-66b3-4772-97fe-639ff66ccd68" />
+
