@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Wars: Galactic IT Edition</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--gold:#FFD700;--cyan:#00D4FF;--red:#FF4444;--green:#00FF88;--bg:#0a0a1a;--card:rgba(15,15,40,0.85);--border:rgba(100,100,255,0.15)}
+body{font-family:'Exo 2',sans-serif;background:var(--bg);color:#e0e0f0;min-height:100vh;overflow-x:hidden}
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(2px 2px at 20px 30px,#fff,transparent),radial-gradient(2px 2px at 40px 70px,rgba(255,255,255,.6),transparent),radial-gradient(1px 1px at 90px 40px,#fff,transparent),radial-gradient(1px 1px at 130px 80px,rgba(255,255,255,.4),transparent),radial-gradient(2px 2px at 160px 30px,#fff,transparent);background-size:200px 100px;animation:twinkle 4s ease-in-out infinite alternate}
+@keyframes twinkle{0%{opacity:.7}100%{opacity:1}}
+.scanline{position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,100,255,.015) 2px,rgba(0,100,255,.015) 4px)}
+.container{position:relative;z-index:2;max-width:960px;margin:0 auto;padding:20px}
+h1.logo{font-family:'Orbitron',monospace;text-align:center;font-size:clamp(1.4rem,4vw,2.4rem);font-weight:900;background:linear-gradient(135deg,var(--gold),#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px;margin:20px 0 4px}
+.subtitle{text-align:center;font-size:.85rem;color:var(--cyan);letter-spacing:6px;text-transform:uppercase;margin-bottom:24px;opacity:.8}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,.4),transparent)}
+.glow-line{height:2px;background:linear-gradient(90deg,transparent,var(--cyan),var(--gold),var(--cyan),transparent);margin:16px 0;border-radius:2px}
+.btn{font-family:'Orbitron',monospace;border:none;border-radius:10px;padding:12px 28px;font-size:.85rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .25s}
+.btn:active{transform:scale(.96)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,#1a3a6a,#0d1f3c);color:var(--cyan);border:1px solid rgba(0,212,255,.3)}
+.btn-primary:hover:not(:disabled){box-shadow:0 0 20px rgba(0,212,255,.25)}
+.btn-gold{background:linear-gradient(135deg,#3a2a00,#1a1200);color:var(--gold);border:1px solid rgba(255,215,0,.3)}
+.btn-gold:hover:not(:disabled){box-shadow:0 0 20px rgba(255,215,0,.25)}
+.btn-danger{background:linear-gradient(135deg,#3a0a0a,#1a0505);color:var(--red);border:1px solid rgba(255,68,68,.3)}
+.btn-danger:hover:not(:disabled){box-shadow:0 0 20px rgba(255,68,68,.2)}
+.btn-sm{padding:8px 16px;font-size:.7rem}
+.hidden{display:none!important}
+
+/* Setup */
+.setup-row{display:flex;gap:12px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
+.setup-row label{font-family:'Orbitron',monospace;font-size:.7rem;color:var(--gold);letter-spacing:2px;min-width:80px}
+.setup-row input{flex:1;min-width:140px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:#e0e0f0;font-family:'Exo 2',sans-serif;font-size:.95rem;outline:none;transition:.3s}
+.setup-row input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,.2)}
+
+/* Character Select */
+.char-phase-title{font-family:'Orbitron',monospace;text-align:center;font-size:1.1rem;letter-spacing:3px;margin-bottom:4px}
+.char-phase-sub{text-align:center;font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:16px}
+.team-label{font-family:'Orbitron',monospace;font-size:.8rem;letter-spacing:2px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.team-label.t1c{color:var(--cyan)}.team-label.t2c{color:#ff6666}
+.player-add-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.player-add-row input{flex:1;min-width:120px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:#e0e0f0;font-family:'Exo 2',sans-serif;font-size:.85rem;outline:none}
+.player-add-row input:focus{border-color:var(--cyan)}
+.player-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;min-height:20px}
+.player-tag{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.85rem;cursor:pointer;transition:.2s}
+.player-tag:hover{border-color:rgba(255,215,0,.3)}
+.player-tag.active-pick{outline:2px solid var(--gold)}
+.player-tag .p-avatar{font-size:1.3rem}.player-tag .p-name{flex:1;font-weight:600}
+.player-tag .p-char{font-size:.7rem;color:var(--gold);opacity:.7}
+.player-tag .p-remove{cursor:pointer;color:var(--red);opacity:.5;font-size:1.1rem;transition:.2s}
+.player-tag .p-remove:hover{opacity:1}
+.char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin:12px 0}
+.char-card{text-align:center;padding:10px 6px;border-radius:12px;border:2px solid transparent;cursor:pointer;transition:all .25s;background:rgba(0,0,0,.25);position:relative}
+.char-card:hover:not(.taken){border-color:rgba(255,215,0,.3);transform:translateY(-2px)}
+.char-card.selected{border-color:var(--gold);background:rgba(255,215,0,.1);box-shadow:0 0 16px rgba(255,215,0,.15)}
+.char-card.taken{opacity:.25;cursor:not-allowed;pointer-events:none}
+.char-card .c-icon{font-size:2.2rem;display:block;margin-bottom:4px}
+.char-card .c-name{font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:1px;color:var(--gold)}
+.char-card .c-side{font-size:.5rem;color:rgba(255,255,255,.35);margin-top:2px}
+.char-card .taken-by{position:absolute;top:3px;right:5px;font-size:.5rem;color:var(--red);font-family:'Orbitron',monospace}
+
+/* Scoreboard */
+.scoreboard{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:8px}
+.team-score{text-align:center;padding:14px;border-radius:12px}
+.team-score.t1{background:linear-gradient(135deg,rgba(0,100,255,.1),rgba(0,50,150,.05));border:1px solid rgba(0,150,255,.2)}
+.team-score.t2{background:linear-gradient(135deg,rgba(255,50,50,.1),rgba(150,20,20,.05));border:1px solid rgba(255,80,80,.2)}
+.team-score.active{box-shadow:0 0 25px rgba(0,212,255,.15)}
+.team-score .name{font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:2px;margin-bottom:4px;opacity:.8}
+.team-score .pts{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900}
+.t1 .pts{color:var(--cyan)}.t2 .pts{color:#ff6666}
+.bar-wrap{height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.t1 .bar-fill{background:linear-gradient(90deg,var(--cyan),#0088ff)}
+.t2 .bar-fill{background:linear-gradient(90deg,#ff6666,var(--red))}
+.win-target{text-align:center;font-size:.65rem;color:rgba(255,215,0,.4);margin-top:6px;font-family:'Orbitron',monospace;letter-spacing:1px}
+.roster-strip{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.roster-chip{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:20px;padding:3px 8px 3px 5px;font-size:.65rem;transition:.3s}
+.roster-chip.current-player{border-color:var(--gold);background:rgba(255,215,0,.08);box-shadow:0 0 10px rgba(255,215,0,.1)}
+.roster-chip.eliminated{opacity:.3;text-decoration:line-through;border-color:rgba(255,0,0,.2)}
+.roster-chip .rc-avatar{font-size:.9rem}.roster-chip .rc-name{max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.roster-chip .rc-pts{font-family:'Orbitron',monospace;font-size:.55rem;color:var(--gold);margin-left:2px}
+.roster-chip .rc-strikes{color:var(--red);font-size:.6rem;margin-left:2px}
+
+/* Categories */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;margin:14px 0}
+.cat-btn{background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .25s}
+.cat-btn:hover{border-color:var(--cyan);background:rgba(0,80,180,.1);transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,212,255,.1)}
+.cat-btn .emoji{font-size:1.5rem;display:block;margin-bottom:4px}
+.cat-btn .cat-name{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:1px;color:var(--gold)}
+.cat-btn .cat-topic{font-size:.68rem;color:rgba(255,255,255,.5);margin-top:2px}
+.cat-btn.selected{border-color:var(--gold);background:rgba(255,215,0,.08)}
+.tier-row{display:flex;gap:10px;justify-content:center;margin:14px 0;flex-wrap:wrap}
+.tier-btn{flex:1;min-width:110px;max-width:180px;padding:10px;border-radius:10px;text-align:center;cursor:pointer;border:1px solid var(--border);background:rgba(0,0,0,.3);transition:all .25s}
+.tier-btn:hover{transform:translateY(-2px)}
+.tier-btn.t-padawan{border-color:rgba(0,200,100,.3)}.tier-btn.t-padawan:hover,.tier-btn.t-padawan.sel{background:rgba(0,200,100,.1);box-shadow:0 0 14px rgba(0,200,100,.15)}
+.tier-btn.t-jedi{border-color:rgba(0,150,255,.3)}.tier-btn.t-jedi:hover,.tier-btn.t-jedi.sel{background:rgba(0,150,255,.1);box-shadow:0 0 14px rgba(0,150,255,.15)}
+.tier-btn.t-master{border-color:rgba(255,50,50,.3)}.tier-btn.t-master:hover,.tier-btn.t-master.sel{background:rgba(255,50,50,.1);box-shadow:0 0 14px rgba(255,50,50,.15)}
+.tier-btn .tier-label{font-family:'Orbitron',monospace;font-size:.68rem;letter-spacing:1px}
+.tier-btn .tier-pts{font-size:.6rem;opacity:.6;margin-top:2px}
+.tier-btn .tier-warn{font-size:.5rem;color:var(--red);margin-top:3px}
+.turn-indicator{text-align:center;font-family:'Orbitron',monospace;font-size:.85rem;letter-spacing:2px;margin:10px 0;padding:10px;border-radius:8px;background:linear-gradient(90deg,transparent,rgba(0,212,255,.06),transparent)}
+.round-badge{text-align:center;font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:3px;color:rgba(255,215,0,.4);margin-bottom:6px}
+.cpb{text-align:center;margin:6px 0}
+.cpb span{display:inline-flex;align-items:center;gap:6px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:20px;padding:4px 14px;font-size:.8rem}
+.cpb .cpb-icon{font-size:1.2rem}.cpb .cpb-name{font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:1px;color:var(--gold)}
+.cpb .cpb-strikes{color:var(--red);font-size:.7rem;margin-left:4px}
+
+/* Question */
+.q-text{font-size:1.05rem;font-weight:600;margin:14px 0;line-height:1.5}
+.q-meta{font-size:.72rem;color:var(--cyan);margin-bottom:4px;font-family:'Orbitron',monospace;letter-spacing:1px}
+.answers{display:grid;gap:10px;margin:14px 0}
+.ans-btn{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid var(--border);cursor:pointer;transition:all .25s;text-align:left}
+.ans-btn:hover:not(.disabled){border-color:var(--cyan);background:rgba(0,80,180,.1);transform:translateX(4px)}
+.ans-btn .letter{font-family:'Orbitron',monospace;font-weight:900;font-size:1rem;color:var(--gold);min-width:26px}
+.ans-btn .ans-text{font-size:.92rem}
+.ans-btn.correct-ans{border-color:var(--green)!important;background:rgba(0,255,100,.08)!important}
+.ans-btn.wrong-ans{border-color:var(--red)!important;background:rgba(255,0,0,.08)!important;opacity:.7}
+.ans-btn.disabled{cursor:default;pointer-events:none}
+.timer-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin:10px 0;overflow:hidden}
+.timer-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold),var(--red));border-radius:2px;transition:width .1s linear}
+.timer-text{text-align:center;font-family:'Orbitron',monospace;font-size:.75rem;color:var(--gold)}
+
+/* Feedback */
+.feedback{padding:16px;border-radius:12px;margin:12px 0;animation:fadeSlide .4s ease}
+.feedback.correct{background:rgba(0,255,100,.06);border:1px solid rgba(0,255,100,.2)}
+.feedback.wrong{background:rgba(255,50,50,.06);border:1px solid rgba(255,50,50,.2)}
+.feedback.elimination{background:rgba(255,0,0,.1);border:2px solid rgba(255,0,0,.4);box-shadow:0 0 30px rgba(255,0,0,.15)}
+.bot-quote{font-style:italic;font-size:.92rem;margin-bottom:8px}
+.elim-quote{font-size:1.1rem;font-weight:700;color:var(--red);text-align:center;padding:12px 0;text-shadow:0 0 20px rgba(255,0,0,.3)}
+.explanation{font-size:.82rem;color:rgba(255,255,255,.6);margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05)}
+.strike-display{display:flex;gap:4px;justify-content:center;margin:8px 0;font-size:1.2rem}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shakeElim{0%,100%{transform:translateX(0)}10%,30%,50%,70%,90%{transform:translateX(-4px)}20%,40%,60%,80%{transform:translateX(4px)}}
+.shake{animation:shakeElim .6s ease}
+
+/* Winner */
+.winner-screen{text-align:center;padding:30px 20px;animation:fadeSlide .6s ease}
+.winner-screen h2{font-family:'Orbitron',monospace;font-size:clamp(1.1rem,3vw,1.8rem);color:var(--gold);margin:14px 0}
+.winner-screen .trophy{font-size:3.5rem;display:block;margin-bottom:10px;animation:pulse 1.5s ease infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.mvp-section{margin-top:16px;padding:14px;background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.15);border-radius:12px}
+.mvp-section h3{font-family:'Orbitron',monospace;font-size:.75rem;letter-spacing:2px;color:var(--gold);margin-bottom:10px}
+.mvp-row{display:flex;align-items:center;gap:8px;justify-content:center;margin:6px 0;font-size:.85rem}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:12px}
+.stat-card{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card.elim-card{border-color:rgba(255,0,0,.2);opacity:.6}
+.stat-card .s-avatar{font-size:1.4rem}.stat-card .s-name{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:1px;color:var(--cyan);margin:2px 0}
+.stat-card .s-pts{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;color:var(--gold)}
+.stat-card .s-detail{font-size:.6rem;color:rgba(255,255,255,.4);margin-top:2px}
+.stat-card .s-elim{font-size:.55rem;color:var(--red);margin-top:2px}
+
+/* Log */
+.log{max-height:180px;overflow-y:auto;font-size:.75rem;color:rgba(255,255,255,.5);padding:10px;background:rgba(0,0,0,.2);border-radius:8px;margin-top:10px}
+.log p{margin:2px 0;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03)}.log p:last-child{border:none}
+.log .log-correct{color:var(--green)}.log .log-wrong{color:var(--red)}.log .log-elim{color:#ff0000;font-weight:700}
+.loader{display:flex;justify-content:center;gap:6px;padding:30px}
+.loader span{width:10px;height:10px;border-radius:50%;background:var(--cyan);animation:bounce .6s ease-in-out infinite}
+.loader span:nth-child(2){animation-delay:.1s}.loader span:nth-child(3){animation-delay:.2s}
+@keyframes bounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-14px);opacity:1}}
+</style>
+</head>
+<body>
+<div class="stars"></div><div class="scanline"></div>
+<div class="container">
+<h1 class="logo">⚔️ CODE WARS ⚔️</h1>
+<div class="subtitle">Galactic IT Edition</div>
+
+<!-- SETUP -->
+<div id="setupScreen">
+<div class="panel">
+<div class="setup-row"><label>TEAM 1</label><input id="t1Name" value="Rebel Alliance"></div>
+<div class="setup-row"><label>TEAM 2</label><input id="t2Name" value="Galactic Empire"></div>
+<div class="setup-row"><label>WIN AT</label><input id="winScore" type="number" value="1500" min="300" max="5000" step="100"></div>
+<div class="glow-line"></div>
+<div style="text-align:center"><button class="btn btn-primary" onclick="goToCharSelect()" style="font-size:1rem;padding:14px 48px">⚡ ASSEMBLE TEAMS</button></div>
+<div style="text-align:center;margin-top:10px;font-size:.7rem;color:rgba(255,255,255,.3)">⚠️ Master tier: 3 strikes and you're ELIMINATED</div>
+</div>
+</div>
+
+<!-- CHARACTER SELECT -->
+<div id="charScreen" class="hidden">
+<div class="panel">
+<div class="char-phase-title">CHOOSE YOUR CHARACTERS</div>
+<div class="char-phase-sub">Each player picks a character — no duplicates allowed</div>
+<div class="glow-line"></div>
+<div class="team-label t1c">⚡ <span id="cs_t1name">REBELS</span></div>
+<div class="player-add-row">
+<input id="p1input" placeholder="Player name..." onkeydown="if(event.key==='Enter')addPlayer(0)">
+<button class="btn btn-primary btn-sm" onclick="addPlayer(0)">+ ADD</button>
+</div>
+<div class="player-list" id="plist0"></div>
+<div class="glow-line"></div>
+<div class="team-label t2c">🔥 <span id="cs_t2name">EMPIRE</span></div>
+<div class="player-add-row">
+<input id="p2input" placeholder="Player name..." onkeydown="if(event.key==='Enter')addPlayer(1)">
+<button class="btn btn-danger btn-sm" onclick="addPlayer(1)">+ ADD</button>
+</div>
+<div class="player-list" id="plist1"></div>
+<div class="glow-line"></div>
+<p style="text-align:center;font-size:.78rem;margin-bottom:8px;opacity:.6">Click a player, then pick their character:</p>
+<div class="char-grid" id="charGrid"></div>
+<div class="glow-line"></div>
+<div style="text-align:center">
+<button class="btn btn-gold" id="launchBtn" onclick="launchGame()" disabled style="font-size:1rem;padding:14px 48px">🚀 LAUNCH GAME</button>
+<div id="launchHint" style="font-size:.68rem;color:rgba(255,255,255,.3);margin-top:6px">Each team needs at least 1 player with a character</div>
+</div>
+</div>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen" class="hidden">
+<div class="panel" id="scorePanel">
+<div class="scoreboard">
+<div class="team-score t1" id="tscore1"><div class="name" id="tname1"></div><div class="pts" id="tpts1">0</div><div class="bar-wrap"><div class="bar-fill" id="tbar1" style="width:0%"></div></div><div class="roster-strip" id="roster0"></div></div>
+<div class="team-score t2" id="tscore2"><div class="name" id="tname2"></div><div class="pts" id="tpts2">0</div><div class="bar-wrap"><div class="bar-fill" id="tbar2" style="width:0%"></div></div><div class="roster-strip" id="roster1"></div></div>
+</div>
+<div class="win-target">🏆 FIRST TO <span id="winLabel">1500</span> WINS</div>
+</div>
+
+<!-- Category -->
+<div id="phaseCategory" class="hidden"><div class="panel">
+<div class="round-badge">ROUND <span id="roundNum">1</span></div>
+<div class="turn-indicator">⚡ <span id="turnTeam"></span>'S TURN ⚡</div>
+<div class="cpb"><span><span class="cpb-icon" id="cpbIcon"></span><span class="cpb-name" id="cpbName"></span><span class="cpb-strikes" id="cpbStrikes"></span> is answering</span></div>
+<div class="glow-line"></div>
+<p style="text-align:center;font-size:.8rem;margin-bottom:6px;opacity:.6">Select a planet:</p>
+<div class="cat-grid" id="catGrid"></div>
+<div class="glow-line"></div>
+<p style="text-align:center;font-size:.8rem;margin-bottom:6px;opacity:.6">Select difficulty:</p>
+<div class="tier-row">
+<div class="tier-btn t-padawan" onclick="selectTier(1)"><div class="tier-label">PADAWAN</div><div class="tier-pts">100 pts</div></div>
+<div class="tier-btn t-jedi" onclick="selectTier(2)"><div class="tier-label">JEDI</div><div class="tier-pts">200 pts</div></div>
+<div class="tier-btn t-master" onclick="selectTier(3)"><div class="tier-label">MASTER</div><div class="tier-pts">300 pts</div><div class="tier-warn">☠️ 3 STRIKES = OUT</div></div>
+</div>
+<div style="text-align:center;margin-top:12px">
+<button class="btn btn-gold" id="goBtn" onclick="fireQuestion()" disabled>🔮 ENGAGE HOLOCRON</button>
+</div>
+</div></div>
+
+<!-- Question -->
+<div id="phaseQuestion" class="hidden"><div class="panel">
+<div class="q-meta" id="qMeta"></div>
+<div class="cpb"><span><span class="cpb-icon" id="qpbIcon"></span><span class="cpb-name" id="qpbName"></span><span class="cpb-strikes" id="qpbStrikes"></span></span></div>
+<div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+<div class="timer-text" id="timerText">30s</div>
+<div class="q-text" id="qText"></div>
+<div class="answers" id="answersDiv"></div>
+</div></div>
+
+<!-- Feedback -->
+<div id="phaseFeedback" class="hidden"><div class="panel">
+<div id="feedbackBox"></div>
+<div style="text-align:center;margin-top:14px"><button class="btn btn-primary" onclick="nextTurn()">➡️ NEXT TURN</button></div>
+</div></div>
+
+<!-- Winner -->
+<div id="phaseWinner" class="hidden"><div class="panel"><div class="winner-screen">
+<span class="trophy">🏆</span>
+<h2 id="winnerName"></h2>
+<p style="color:var(--cyan)">WINS THE GALAXY!</p>
+<div class="glow-line"></div>
+<div id="finalScore"></div>
+<div class="mvp-section"><h3>⭐ PLAYER STATS ⭐</h3><div id="playerStats"></div></div>
+<div style="margin-top:18px"><button class="btn btn-gold" onclick="resetGame()">🔄 NEW GAME</button></div>
+</div></div></div>
+
+<!-- Log -->
+<div class="panel">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span style="font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:2px;color:rgba(255,255,255,.4)">BATTLE LOG</span>
+<button class="btn btn-danger btn-sm" onclick="endGame()">🛑 END GAME</button>
+</div>
+<div class="log" id="gameLog"><p>Awaiting orders...</p></div>
+</div>
+</div>
+</div>
+
+<script>
+const CHARACTERS=[
+{id:"leia",name:"Princess Leia",icon:"👸",side:"Light"},
+{id:"vader",name:"Darth Vader",icon:"🖤",side:"Dark"},
+{id:"obiwan",name:"Obi-Wan Kenobi",icon:"🧔",side:"Light"},
+{id:"chewie",name:"Chewbacca",icon:"🐻",side:"Light"},
+{id:"yoda",name:"Yoda",icon:"🟢",side:"Light"},
+{id:"luke",name:"Luke Skywalker",icon:"⚔️",side:"Light"},
+{id:"han",name:"Han Solo",icon:"🔫",side:"Light"},
+{id:"palpatine",name:"Palpatine",icon:"⚡",side:"Dark"},
+{id:"maul",name:"Darth Maul",icon:"😈",side:"Dark"},
+{id:"boba",name:"Boba Fett",icon:"🪖",side:"Dark"},
+{id:"mando",name:"Mandalorian",icon:"🛡️",side:"Neutral"},
+{id:"ahsoka",name:"Ahsoka Tano",icon:"🗡️",side:"Light"},
+];
+const CATEGORIES=[
+{name:"Coruscant Command",emoji:"🌌",topic:"Incident Management"},
+{name:"Tatooine Lockdown",emoji:"🔐",topic:"Password & Access"},
+{name:"Hoth Outpost",emoji:"❄️",topic:"Hardware & Equipment"},
+{name:"Death Star Grid",emoji:"🪐",topic:"Network & Connectivity"},
+{name:"Endor Systems",emoji:"🌲",topic:"Software & Applications"},
+{name:"Jedi Archives",emoji:"📚",topic:"User Training & Docs"},
+{name:"Mustafar Forge",emoji:"🔥",topic:"Knowledge & Escalation"},
+{name:"Naboo Vault",emoji:"🏛️",topic:"Databases"},
+];
+const TIER_PTS={1:100,2:200,3:300},TIER_LBL={1:"Padawan",2:"Jedi",3:"Master"};
+const GEMINI_API_KEY="AIzaSyCfHpbljiSIm2QA7-_611PkM-ljxtr7_UM";
+
+const BOT={
+correct:["🤖 C-3PO: Correct! The odds were 3,720 to 1!","🤖 C-3PO: Splendid! Even Master Luke would be proud!","🔵 R2-D2: BWEEP BOOP! ✅ CORRECT!!","🔵 R2-D2: BEEP BWEEEEEP! 🎉 RIGHT!!"],
+wrong:["🤖 C-3PO: Oh dear. Incorrect.","🤖 C-3PO: Wrong! Recalibrate your knowledge base.","🔵 R2-D2: BZZZT! ❌ wrong...","🔵 R2-D2: WHIRRRR... *droops sadly* nope."],
+timeout:["🤖 C-3PO: We're doomed! Time expired!","🔵 R2-D2: BWEEEEP BZZZT!! TIME UP!!"]
+};
+
+// Elimination quotes based on who's winning
+const ELIM_QUOTES={
+darkWinning:[
+"🖤 Darth Vader: \"You have failed me for the last time.\"",
+"⚡ Palpatine: \"You are no longer of any use to me.\"",
+"🖤 Darth Vader: \"I find your lack of knowledge... disturbing.\"",
+"😈 Darth Maul: \"At last... one less fool to deal with.\"",
+"⚡ Palpatine: \"Your feeble skills are no match for the Dark Side.\"",
+],
+lightWinning:[
+"🟢 Yoda: \"Much to learn, you still have. Sit down, you must.\"",
+"🧔 Obi-Wan: \"You were supposed to be the chosen one...\"",
+"👸 Leia: \"Somebody has to save our skins. Not you, though.\"",
+"⚔️ Luke: \"The Force is not strong with this one.\"",
+"🐻 Chewbacca: \"RRRAAAGGGHHH!!\" (Translation: Goodbye, friend.)",
+],
+tied:[
+"🤖 C-3PO: \"The odds of surviving were 725 to 1. They did not survive.\"",
+"🔵 R2-D2: BWEEEP... BZZZT... *plays sad trombone*... WHIRRRR...",
+"🤖 C-3PO: \"Another one down! This is most distressing!\"",
+]
+};
+
+const FALLBACK={"Incident Management":[{question:"What is the primary goal of incident management?",answers:["Restore service ASAP","Blame the intern","Reboot the Death Star","File a TPS report"],correct:0,explanation:"Incident management restores normal service as quickly as possible."},{question:"In ITIL, what separates an incident from a problem?",answers:["Incidents are events; problems are root causes","They're identical","Problems are less severe","Incidents only happen on Mondays"],correct:0,explanation:"An incident is a disruption; a problem is the underlying root cause."},{question:"What does MTTR stand for?",answers:["Mean Time To Repair","Maximum Ticket Transfer Rate","Minimum Thermal Threshold","Master Technician Training"],correct:0,explanation:"MTTR measures average time to restore a failed system."},{question:"What is a severity 1 (SEV-1) incident?",answers:["Critical outage affecting all users","Minor UI bug","Slow email delivery","Printer jam in break room"],correct:0,explanation:"SEV-1 means a critical system is completely down impacting all users."},{question:"What is an incident postmortem?",answers:["Review after resolution to prevent recurrence","Autopsy of a dead server","Canceling the ticket","Blaming the new hire"],correct:0,explanation:"A postmortem analyzes what happened and how to prevent it."}],"Password & Access":[{question:"What does MFA stand for?",answers:["Multi-Factor Authentication","Maximum Firewall Access","Main File Authorization","Mandatory Folder Archival"],correct:0,explanation:"MFA requires two or more verification methods."},{question:"Best practice for password storage?",answers:["Salted hash","Plain text spreadsheet","Tattooed on arm","Sticky note on monitor"],correct:0,explanation:"Passwords should be stored as salted hashes."},{question:"Which protocol is commonly used for SSO?",answers:["SAML","FTP","SMTP","DNS"],correct:0,explanation:"SAML is widely used for Single Sign-On."},{question:"What is the principle of least privilege?",answers:["Give only minimum access needed","Everyone gets admin","Trust all users equally","No access for anyone"],correct:0,explanation:"Users should only have access required for their role."},{question:"What does RBAC stand for?",answers:["Role-Based Access Control","Remote Backup And Copy","Really Big Access Credentials","Redundant Biometric Auth Check"],correct:0,explanation:"RBAC assigns permissions based on organizational roles."}],"Hardware & Equipment":[{question:"What does POST stand for in booting?",answers:["Power-On Self-Test","Pre-OS Transfer","Primary Output Toggle","Parallel Optical Signal"],correct:0,explanation:"POST checks hardware during startup."},{question:"Which stores data without power?",answers:["SSD/HDD","RAM","CPU Cache","GPU VRAM"],correct:0,explanation:"SSDs and HDDs retain data without power."},{question:"Purpose of thermal paste on CPU?",answers:["Improve heat transfer","Make it smell nice","Increase clock speed","Waterproof the chip"],correct:0,explanation:"Thermal paste fills gaps for better heat conduction."},{question:"What does DIMM refer to?",answers:["Dual Inline Memory Module","Digital Internal Modem Manager","Direct Input Multiplexer","Disk Image Mount Module"],correct:0,explanation:"DIMMs are the physical RAM sticks in a computer."},{question:"What is a KVM switch used for?",answers:["Share keyboard/video/mouse across PCs","Overclock the CPU","Encrypt hard drives","Boost WiFi signal"],correct:0,explanation:"KVM switches let you control multiple computers with one set of peripherals."}],"Network & Connectivity":[{question:"What does DNS stand for?",answers:["Domain Name System","Data Network Service","Digital Node Switch","Dynamic Naming Standard"],correct:0,explanation:"DNS translates domain names to IP addresses."},{question:"What is a default gateway?",answers:["Router forwarding external traffic","Data center entrance","Browser homepage","Firewall setting"],correct:0,explanation:"Default gateway routes traffic to external networks."},{question:"Default port for HTTPS?",answers:["443","80","22","3389"],correct:0,explanation:"HTTPS uses port 443."},{question:"What does DHCP do?",answers:["Automatically assigns IP addresses","Encrypts web traffic","Blocks malware","Compresses data packets"],correct:0,explanation:"DHCP dynamically assigns IP addresses to devices on a network."},{question:"What is a subnet mask used for?",answers:["Define network vs host portion of IP","Hide your IP from hackers","Speed up downloads","Filter spam emails"],correct:0,explanation:"Subnet masks determine which part of an IP address is the network and which is the host."}],"Software & Applications":[{question:"What does SaaS stand for?",answers:["Software as a Service","System & App Security","Standardized App Architecture","Server-side Automated Scripting"],correct:0,explanation:"SaaS delivers software over the internet."},{question:"Purpose of a package manager?",answers:["Manage software dependencies","Ship physical packages","Manage email attachments","Compress ZIP files"],correct:0,explanation:"Package managers automate dependency management."},{question:"Common config file formats?",answers:["YAML/JSON","BMP","WAV","TIFF"],correct:0,explanation:"YAML and JSON are standard config formats."},{question:"What is containerization (e.g. Docker)?",answers:["Packaging apps with their dependencies to run anywhere","Putting servers in shipping containers","Compressing files into ZIPs","Encrypting databases"],correct:0,explanation:"Containers package code and dependencies for consistent deployment."},{question:"What does API stand for?",answers:["Application Programming Interface","Automated Program Installation","Advanced Protocol Integration","App Performance Index"],correct:0,explanation:"APIs allow different software systems to communicate."}],"User Training & Docs":[{question:"What is a Knowledge Base?",answers:["Centralized info repository","A Star Wars database","A keyboard type","A backup server"],correct:0,explanation:"A KB stores organized info for self-service support."},{question:"Best approach for user documentation?",answers:["Step-by-step with screenshots","Dense single paragraph","Only video","Verbal only"],correct:0,explanation:"Step-by-step guides with visuals are most effective."},{question:"What does FAQ stand for?",answers:["Frequently Asked Questions","File Access Queue","Firewall Auth Query","Fast App Quickstart"],correct:0,explanation:"FAQs address common questions proactively."},{question:"What is a Standard Operating Procedure (SOP)?",answers:["Documented step-by-step instructions for tasks","A type of firewall","An emergency shutdown protocol","A software license"],correct:0,explanation:"SOPs standardize how routine tasks are performed."},{question:"What is the purpose of onboarding documentation?",answers:["Help new users/employees get started quickly","Archive old tickets","Track inventory","Monitor network traffic"],correct:0,explanation:"Onboarding docs accelerate new user productivity."}],"Knowledge & Escalation":[{question:"When to escalate to Tier 2?",answers:["When Tier 1 can't resolve in SLA","Immediately every time","Only Fridays","When user asks nicely"],correct:0,explanation:"Escalation occurs when T1 exhausts procedures within SLA."},{question:"What is a runbook?",answers:["Documented procedure for ops","Fitness tracker","Laptop type","Error log"],correct:0,explanation:"Runbooks provide step-by-step operational instructions."},{question:"What does SLA stand for?",answers:["Service Level Agreement","Software License App","System Log Archive","Secure Login Access"],correct:0,explanation:"SLAs define expected service standards."},{question:"What is a warm transfer?",answers:["Introducing the user to the next agent before hanging up","Transferring calls in summer","Restarting a warm server","Sending a heated ticket"],correct:0,explanation:"Warm transfers brief the next agent so the user doesn't repeat themselves."},{question:"What is a root cause analysis (RCA)?",answers:["Investigation to find the underlying cause of an issue","Scanning for plant viruses","A type of admin access","Resetting the core router"],correct:0,explanation:"RCA digs deep to find why an incident occurred, not just symptoms."}],"Databases":[{question:"What does SQL stand for?",answers:["Structured Query Language","System Quality Level","Standard Question Logic","Sequential Queue Loader"],correct:0,explanation:"SQL manages relational databases."},{question:"What is database normalization?",answers:["Reducing data redundancy","Making DB look normal","Factory reset","Compressing tables"],correct:0,explanation:"Normalization minimizes duplication."},{question:"What is a primary key?",answers:["Unique record identifier","Admin password","First column always","Encryption key type"],correct:0,explanation:"Primary keys uniquely identify each row."},{question:"What is an INDEX in a database?",answers:["Speeds up data retrieval on columns","A table of contents for the server room","A type of backup","A user permission level"],correct:0,explanation:"Indexes create lookup structures for faster queries."},{question:"What does CRUD stand for?",answers:["Create, Read, Update, Delete","Copy, Rename, Upload, Download","Central Redundancy Unit Drive","Cache, Restore, Undo, Deploy"],correct:0,explanation:"CRUD represents the four basic database operations."}]};
+
+// ── STATE ──
+let G={teams:["",""],players:[[],[]],scores:{},currentTeam:0,currentPlayerIdx:[0,0],round:1,selectedCat:null,selectedTier:null,currentQ:null,usedQs:[],winScore:1500,timerInterval:null,timeLeft:30};
+let CS={activePlayer:null,takenChars:{}};
+const $=id=>document.getElementById(id);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+// ═══════════════════════════════════════
+// CHARACTER SELECT
+// ═══════════════════════════════════════
+function goToCharSelect(){
+G.teams=[$("t1Name").value.trim()||"Rebel Alliance",$("t2Name").value.trim()||"Galactic Empire"];
+G.winScore=parseInt($("winScore").value)||1500;
+G.players=[[],[]];CS={activePlayer:null,takenChars:{}};
+$("cs_t1name").textContent=G.teams[0];$("cs_t2name").textContent=G.teams[1];
+$("plist0").innerHTML="";$("plist1").innerHTML="";
+buildCharGrid();checkLaunch();
+$("setupScreen").classList.add("hidden");$("charScreen").classList.remove("hidden");
+}
+function buildCharGrid(){
+const g=$("charGrid");g.innerHTML="";
+CHARACTERS.forEach(c=>{
+const d=document.createElement("div");d.className="char-card";d.dataset.id=c.id;
+d.innerHTML=`<span class="c-icon">${c.icon}</span><div class="c-name">${c.name}</div><div class="c-side">${c.side}</div>`;
+d.onclick=()=>pickChar(c.id);g.appendChild(d);
+});
+}
+function addPlayer(ti){
+const inp=$(ti===0?"p1input":"p2input");const name=inp.value.trim();if(!name)return;
+G.players[ti].push({name,charId:null,score:0,correct:0,wrong:0,answered:0,masterStrikes:0,eliminated:false});
+inp.value="";renderPlayers(ti);checkLaunch();
+}
+function removePlayer(ti,pi){
+const p=G.players[ti][pi];
+if(p.charId){delete CS.takenChars[p.charId];refreshCharGrid();}
+if(CS.activePlayer&&CS.activePlayer.ti===ti&&CS.activePlayer.pi===pi)CS.activePlayer=null;
+G.players[ti].splice(pi,1);renderPlayers(ti);checkLaunch();
+}
+function selectPlayerCS(ti,pi){
+CS.activePlayer={ti,pi};renderPlayers(0);renderPlayers(1);refreshCharGrid();
+}
+function pickChar(charId){
+const ap=CS.activePlayer;if(!ap)return;if(CS.takenChars[charId])return;
+const p=G.players[ap.ti][ap.pi];
+if(p.charId)delete CS.takenChars[p.charId];
+p.charId=charId;CS.takenChars[charId]={ti:ap.ti,pi:ap.pi};
+renderPlayers(ap.ti);refreshCharGrid();checkLaunch();
+let found=false;
+for(let t=0;t<2&&!found;t++)for(let i=0;i<G.players[t].length&&!found;i++){
+if(!G.players[t][i].charId){selectPlayerCS(t,i);found=true;}}
+if(!found)CS.activePlayer=null;
+}
+function renderPlayers(ti){
+const list=$("plist"+ti);list.innerHTML="";
+G.players[ti].forEach((p,i)=>{
+const ch=p.charId?CHARACTERS.find(c=>c.id===p.charId):null;
+const isActive=CS.activePlayer&&CS.activePlayer.ti===ti&&CS.activePlayer.pi===i;
+const d=document.createElement("div");d.className="player-tag"+(isActive?" active-pick":"");
+d.innerHTML=`<span class="p-avatar">${ch?ch.icon:"❓"}</span><span class="p-name">${p.name}</span><span class="p-char">${ch?ch.name:"click to assign"}</span><span class="p-remove" onclick="event.stopPropagation();removePlayer(${ti},${i})">✕</span>`;
+d.onclick=()=>selectPlayerCS(ti,i);list.appendChild(d);
+});
+}
+function refreshCharGrid(){
+document.querySelectorAll(".char-card").forEach(d=>{
+const id=d.dataset.id;const taken=CS.takenChars[id];
+d.classList.remove("selected","taken");
+const old=d.querySelector(".taken-by");if(old)old.remove();
+if(taken){d.classList.add("taken");const by=G.players[taken.ti][taken.pi];const b=document.createElement("div");b.className="taken-by";b.textContent=by.name;d.appendChild(b);}
+const ap=CS.activePlayer;
+if(ap){const pl=G.players[ap.ti][ap.pi];if(pl.charId===id)d.classList.add("selected");}
+});
+}
+function checkLaunch(){
+const ok=G.players[0].length>=1&&G.players[1].length>=1&&G.players[0].every(p=>p.charId)&&G.players[1].every(p=>p.charId);
+$("launchBtn").disabled=!ok;
+$("launchHint").textContent=ok?"All set! May the Force be with you.":"Each team needs at least 1 player with a character";
+}
+
+// ═══════════════════════════════════════
+// GAME
+// ═══════════════════════════════════════
+function launchGame(){
+G.scores={[G.teams[0]]:0,[G.teams[1]]:0};G.currentTeam=0;G.currentPlayerIdx=[0,0];G.round=1;G.usedQs=[];
+G.players.forEach(team=>team.forEach(p=>{p.score=0;p.correct=0;p.wrong=0;p.answered=0;p.masterStrikes=0;p.eliminated=false;}));
+$("charScreen").classList.add("hidden");$("gameScreen").classList.remove("hidden");
+$("gameLog").innerHTML="";logMsg(`⚔️ ${G.teams[0]} vs ${G.teams[1]} — First to ${G.winScore}!`);
+logMsg("☠️ Master tier: 3 strikes = ELIMINATION");
+buildCatGrid();updateScoreboard();showCategoryPhase();
+}
+
+function getActivePlayers(ti){return G.players[ti].filter(p=>!p.eliminated);}
+
+function getCurrentPlayer(){
+const ti=G.currentTeam;const active=getActivePlayers(ti);
+if(active.length===0)return null;
+const pi=G.currentPlayerIdx[ti]%active.length;
+return active[pi];
+}
+
+function getCharOf(p){return CHARACTERS.find(c=>c.id===p.charId);}
+
+function strikesDisplay(n){return n>0?"💀".repeat(n):"";}
+
+function getElimQuote(){
+const s0=G.scores[G.teams[0]],s1=G.scores[G.teams[1]];
+if(s0>s1)return pick(ELIM_QUOTES.lightWinning);
+if(s1>s0)return pick(ELIM_QUOTES.darkWinning);
+return pick(ELIM_QUOTES.tied);
+}
+
+function checkTeamWipeout(){
+for(let ti=0;ti<2;ti++){
+const alive=getActivePlayers(ti);
+if(alive.length===0&&G.players[ti].length>0){
+const otherTeam=G.teams[(ti+1)%2];
+logMsg(`💀 ALL players on ${G.teams[ti]} eliminated! ${otherTeam} wins by default!`,"log-elim");
+showWinner(otherTeam);return true;
+}}return false;
+}
+
+function buildCatGrid(){
+const g=$("catGrid");g.innerHTML="";
+CATEGORIES.forEach((c,i)=>{
+const d=document.createElement("div");d.className="cat-btn";d.dataset.idx=i;
+d.innerHTML=`<span class="emoji">${c.emoji}</span><div class="cat-name">${c.name}</div><div class="cat-topic">${c.topic}</div>`;
+d.onclick=()=>selectCat(i);g.appendChild(d);
+});
+}
+function selectCat(i){G.selectedCat=i;document.querySelectorAll(".cat-btn").forEach((b,j)=>b.classList.toggle("selected",j===i));checkGo();}
+function selectTier(t){G.selectedTier=t;document.querySelectorAll(".tier-btn").forEach(b=>{b.classList.toggle("sel",(t===1&&b.classList.contains("t-padawan"))||(t===2&&b.classList.contains("t-jedi"))||(t===3&&b.classList.contains("t-master")));});checkGo();}
+function checkGo(){$("goBtn").disabled=!(G.selectedCat!==null&&G.selectedTier!==null);}
+
+function updateScoreboard(){
+const [t1,t2]=G.teams;
+$("tname1").textContent=t1;$("tname2").textContent=t2;
+$("tpts1").textContent=G.scores[t1];$("tpts2").textContent=G.scores[t2];
+$("tbar1").style.width=Math.min(100,G.scores[t1]/G.winScore*100)+"%";
+$("tbar2").style.width=Math.min(100,G.scores[t2]/G.winScore*100)+"%";
+$("winLabel").textContent=G.winScore;
+$("tscore1").classList.toggle("active",G.currentTeam===0);
+$("tscore2").classList.toggle("active",G.currentTeam===1);
+const cp=getCurrentPlayer();
+[0,1].forEach(ti=>{
+const strip=$("roster"+ti);strip.innerHTML="";
+G.players[ti].forEach(p=>{
+const ch=getCharOf(p);const isCurrent=(p===cp);
+const d=document.createElement("div");
+d.className="roster-chip"+(isCurrent?" current-player":"")+(p.eliminated?" eliminated":"");
+let inner=`<span class="rc-avatar">${ch?ch.icon:""}</span><span class="rc-name">${p.name}</span><span class="rc-pts">${p.score||0}</span>`;
+if(p.masterStrikes>0)inner+=`<span class="rc-strikes">${"💀".repeat(p.masterStrikes)}</span>`;
+d.innerHTML=inner;strip.appendChild(d);
+});
+});
+}
+
+function showPhase(p){["phaseCategory","phaseQuestion","phaseFeedback","phaseWinner"].forEach(id=>$(id).classList.add("hidden"));$(p).classList.remove("hidden");}
+function logMsg(m,c){const l=$("gameLog");const p=document.createElement("p");if(c)p.className=c;p.textContent=m;l.appendChild(p);l.scrollTop=l.scrollHeight;}
+
+function showCategoryPhase(){
+G.selectedCat=null;G.selectedTier=null;
+document.querySelectorAll(".cat-btn").forEach(b=>b.classList.remove("selected"));
+document.querySelectorAll(".tier-btn").forEach(b=>b.classList.remove("sel"));
+$("goBtn").disabled=true;$("goBtn").textContent="🔮 ENGAGE HOLOCRON";
+const cp=getCurrentPlayer();
+if(!cp){if(!checkTeamWipeout()){G.currentTeam=(G.currentTeam+1)%2;showCategoryPhase();}return;}
+const ch=getCharOf(cp);
+$("turnTeam").textContent=G.teams[G.currentTeam];$("roundNum").textContent=G.round;
+$("cpbIcon").textContent=ch?ch.icon:"";$("cpbName").textContent=cp.name;
+$("cpbStrikes").textContent=cp.masterStrikes>0?" "+strikesDisplay(cp.masterStrikes):"";
+updateScoreboard();showPhase("phaseCategory");
+}
+
+async function fireQuestion(){
+const cat=CATEGORIES[G.selectedCat],tier=G.selectedTier;
+$("goBtn").disabled=true;$("goBtn").textContent="⏳ GENERATING...";
+showPhase("phaseQuestion");
+$("qMeta").textContent=`${cat.emoji} ${cat.name} — ${TIER_LBL[tier]} (${TIER_PTS[tier]} pts)${tier===3?" ☠️":""}`;
+const cp=getCurrentPlayer(),ch=getCharOf(cp);
+$("qpbIcon").textContent=ch?ch.icon:"";$("qpbName").textContent=cp.name;
+$("qpbStrikes").textContent=cp.masterStrikes>0?" "+strikesDisplay(cp.masterStrikes):"";
+$("qText").textContent="";$("answersDiv").innerHTML=`<div class="loader"><span></span><span></span><span></span></div>`;
+$("timerFill").style.width="100%";$("timerText").textContent="...";
+let q;
+if(GEMINI_API_KEY){try{q=await fetchGemini(cat,tier);}catch(e){logMsg("⚠️ AI fail: "+e.message);q=getFallback(cat.topic);}}
+else q=getFallback(cat.topic);
+G.currentQ={...q,category:cat.name,tier};G.usedQs.push(q.question);
+renderQuestion(q);startTimer();
+}
+
+async function fetchGemini(cat,tier){
+const prompt=`You are generating a question for a Star Wars-themed IT trivia game.\nCategory: ${cat.name} (Topic: ${cat.topic})\nDifficulty: ${TIER_LBL[tier]} (${tier===1?"Basic":tier===2?"Intermediate":"Advanced"} IT knowledge)\nRules:\n- Real IT/Help Desk knowledge about "${cat.topic}"\n- 4 choices, ONE correct\n- Wrong answers: funny/Star Wars themed but plausible\n- Randomize correct position 0-3\n- Do NOT repeat: ${G.usedQs.slice(-5).join(" | ")}\nRespond ONLY valid JSON:\n{"question":"...","answers":["A","B","C","D"],"correct":0,"explanation":"..."}`;
+const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,{
+method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:600}})});
+const d=await r.json();const txt=d.candidates?.[0]?.content?.parts?.[0]?.text||"";
+return JSON.parse(txt.replace(/```json|```/g,"").trim());
+}
+function getFallback(topic){const pool=FALLBACK[topic]||FALLBACK["Incident Management"];const av=pool.filter(q=>!G.usedQs.includes(q.question));return av.length?{...pick(av)}:{...pick(pool)};}
+function renderQuestion(q){
+$("qText").textContent=q.question;const div=$("answersDiv");div.innerHTML="";
+["A","B","C","D"].forEach((l,i)=>{
+const b=document.createElement("div");b.className="ans-btn";
+b.innerHTML=`<span class="letter">${l}</span><span class="ans-text">${q.answers[i]}</span>`;
+b.onclick=()=>submitAnswer(i);div.appendChild(b);
+});
+}
+function startTimer(){
+G.timeLeft=30;clearInterval(G.timerInterval);
+$("timerFill").style.width="100%";$("timerText").textContent="30s";
+G.timerInterval=setInterval(()=>{G.timeLeft--;$("timerFill").style.width=(G.timeLeft/30*100)+"%";$("timerText").textContent=G.timeLeft+"s";
+if(G.timeLeft<=0){clearInterval(G.timerInterval);handleTimeout();}},1000);
+}
+
+function handleTimeout(){
+const q=G.currentQ,cp=getCurrentPlayer(),ch=getCharOf(cp);
+cp.answered++;cp.wrong++;
+let elimHtml="";
+if(q.tier===3){cp.masterStrikes++;
+if(cp.masterStrikes>=3){cp.eliminated=true;
+const eq=getElimQuote();
+elimHtml=`<div class="feedback elimination shake"><div class="elim-quote">${eq}</div><div class="strike-display">💀💀💀</div><p style="text-align:center;font-weight:700">☠️ ${ch?ch.icon:""} <strong>${cp.name}</strong> HAS BEEN ELIMINATED!</p></div>`;
+logMsg(`☠️ ${cp.name} ELIMINATED! (timeout — 3rd strike)`,"log-elim");
+}else{elimHtml=`<div class="strike-display">${strikesDisplay(cp.masterStrikes)} (${cp.masterStrikes}/3 strikes)</div>`;}}
+document.querySelectorAll(".ans-btn").forEach((b,i)=>{b.classList.add("disabled");if(i===q.correct)b.classList.add("correct-ans");});
+setTimeout(()=>{
+$("feedbackBox").innerHTML=`<div class="feedback wrong"><div class="bot-quote">${pick(BOT.timeout)}</div><p>⏱️ Time's up for ${ch?ch.icon:""} <strong>${cp.name}</strong>! Correct: <strong>(${["A","B","C","D"][q.correct]})</strong> ${q.answers[q.correct]}</p>${q.explanation?`<div class="explanation">💡 ${q.explanation}</div>`:""}</div>${elimHtml}`;
+updateScoreboard();
+if(cp.eliminated&&checkTeamWipeout())return;
+showPhase("phaseFeedback");},800);
+}
+
+function submitAnswer(idx){
+clearInterval(G.timerInterval);
+const q=G.currentQ,correct=idx===q.correct;
+const team=G.teams[G.currentTeam],cp=getCurrentPlayer(),ch=getCharOf(cp);
+cp.answered++;
+document.querySelectorAll(".ans-btn").forEach((b,i)=>{b.classList.add("disabled");if(i===q.correct)b.classList.add("correct-ans");if(i===idx&&!correct)b.classList.add("wrong-ans");});
+
+setTimeout(()=>{
+let elimHtml="";
+if(correct){
+const pts=TIER_PTS[q.tier];G.scores[team]+=pts;cp.score+=pts;cp.correct++;
+updateScoreboard();
+if(G.scores[team]>=G.winScore){showWinner(team);return;}
+}else{
+cp.wrong++;
+if(q.tier===3){cp.masterStrikes++;
+if(cp.masterStrikes>=3){cp.eliminated=true;
+const eq=getElimQuote();
+elimHtml=`<div class="feedback elimination shake"><div class="elim-quote">${eq}</div><div class="strike-display">💀💀💀</div><p style="text-align:center;font-weight:700">☠️ ${ch?ch.icon:""} <strong>${cp.name}</strong> HAS BEEN ELIMINATED!</p></div>`;
+logMsg(`☠️ ${cp.name} ELIMINATED! (3rd Master strike)`,"log-elim");
+}else{elimHtml=`<div class="strike-display">${strikesDisplay(cp.masterStrikes)} (${cp.masterStrikes}/3 Master strikes)</div>`;
+logMsg(`💀 ${cp.name} takes Master strike ${cp.masterStrikes}/3`,"log-wrong");}
+}}
+
+$("feedbackBox").innerHTML=`<div class="feedback ${correct?"correct":"wrong"}"><div class="bot-quote">${pick(correct?BOT.correct:BOT.wrong)}</div><p>${correct?`✅ ${ch?ch.icon:""} <strong>${cp.name}</strong> got it! +${TIER_PTS[q.tier]} for <strong>${team}</strong>!`:`❌ ${ch?ch.icon:""} <strong>${cp.name}</strong> missed! Correct: <strong>(${["A","B","C","D"][q.correct]})</strong> ${q.answers[q.correct]}`}</p>${q.explanation?`<div class="explanation">💡 ${q.explanation}</div>`:""}</div>${elimHtml}`;
+if(!correct)logMsg(`❌ ${cp.name} (${team}): ${q.category} ${TIER_LBL[q.tier]}`,"log-wrong");
+else logMsg(`✅ ${cp.name} (${team}): +${TIER_PTS[q.tier]} ${q.category} ${TIER_LBL[q.tier]}`,"log-correct");
+updateScoreboard();
+if(cp.eliminated&&checkTeamWipeout())return;
+showPhase("phaseFeedback");
+},800);
+}
+
+function nextTurn(){
+G.currentPlayerIdx[G.currentTeam]++;
+G.currentTeam=(G.currentTeam+1)%2;
+G.round++;G.currentQ=null;
+// skip eliminated players
+let safety=0;
+while(getCurrentPlayer()===null&&safety<20){G.currentTeam=(G.currentTeam+1)%2;safety++;}
+if(safety>=20){checkTeamWipeout();return;}
+showCategoryPhase();
+}
+
+function showWinner(team){
+updateScoreboard();
+$("winnerName").textContent=team+" WINS!";
+$("finalScore").innerHTML=`<p style="font-family:'Orbitron',monospace;font-size:.85rem">${G.teams[0]}: ${G.scores[G.teams[0]]} — ${G.teams[1]}: ${G.scores[G.teams[1]]}</p>`;
+const all=[...G.players[0].map(p=>({...p,team:G.teams[0]})),...G.players[1].map(p=>({...p,team:G.teams[1]}))];
+all.sort((a,b)=>(b.score||0)-(a.score||0));
+const mvp=all.find(p=>p.score>0);const mvpCh=mvp?CHARACTERS.find(c=>c.id===mvp.charId):null;
+let html="";
+if(mvp)html+=`<div class="mvp-row"><span style="font-size:1.6rem">${mvpCh?mvpCh.icon:"⭐"}</span><strong style="color:var(--gold)">${mvp.name}</strong> — MVP with ${mvp.score} pts!</div>`;
+html+=`<div class="stats-grid">`;
+all.forEach(p=>{
+const ch=CHARACTERS.find(c=>c.id===p.charId);
+html+=`<div class="stat-card${p.eliminated?" elim-card":""}"><div class="s-avatar">${ch?ch.icon:""}</div><div class="s-name">${p.name}</div><div class="s-pts">${p.score||0}</div><div class="s-detail">${p.correct||0}✅ ${p.wrong||0}❌ (${p.answered||0} Q's)</div>${p.eliminated?`<div class="s-elim">☠️ ELIMINATED (${p.masterStrikes} strikes)</div>`:`<div class="s-detail">${p.masterStrikes>0?strikesDisplay(p.masterStrikes)+" Master strikes":"🏅 Survived"}</div>`}</div>`;
+});
+html+=`</div>`;
+$("playerStats").innerHTML=html;
+logMsg(`🏆 ${team} WINS! MVP: ${mvp?mvp.name:"—"}`);
+showPhase("phaseWinner");
+}
+
+function endGame(){
+clearInterval(G.timerInterval);
+const [t1,t2]=G.teams;
+const w=G.scores[t1]>G.scores[t2]?t1:G.scores[t2]>G.scores[t1]?t2:null;
+showWinner(w||"Nobody");
+}
+function resetGame(){clearInterval(G.timerInterval);$("gameScreen").classList.add("hidden");$("charScreen").classList.add("hidden");$("setupScreen").classList.remove("hidden");}
+</script>
+</body>
+</html>
